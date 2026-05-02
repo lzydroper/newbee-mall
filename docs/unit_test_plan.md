@@ -26,7 +26,7 @@
 测试包及类：
 
 - `ltd.newbee.mall.service.impl.NewBeeMallUserServiceImpl`
-- 建议测试类：`NewBeeMallUserServiceImplTest`
+- 对应测试类：`NewBeeMallUserServiceImplTest`
 
 a. 正确性测试：
 
@@ -49,7 +49,7 @@ b. 健壮性测试：
 测试包及类：
 
 - `ltd.newbee.mall.service.impl.AdminUserServiceImpl`
-- 建议测试类：`AdminUserServiceImplTest`
+- 对应测试类：`AdminUserServiceImplTest`
 
 a. 正确性测试：
 
@@ -70,7 +70,7 @@ b. 健壮性测试：
 测试包及类：
 
 - `ltd.newbee.mall.service.impl.NewBeeMallGoodsServiceImpl`
-- 建议测试类：`NewBeeMallGoodsServiceImplTest`
+- 对应测试类：`NewBeeMallGoodsServiceImplTest`
 
 a. 正确性测试：
 
@@ -95,7 +95,7 @@ b. 健壮性测试：
 测试包及类：
 
 - `ltd.newbee.mall.service.impl.NewBeeMallCategoryServiceImpl`
-- 建议测试类：`NewBeeMallCategoryServiceImplTest`
+- 对应测试类：`NewBeeMallCategoryServiceImplTest`
 
 a. 正确性测试：
 
@@ -120,7 +120,7 @@ b. 健壮性测试：
 测试包及类：
 
 - `ltd.newbee.mall.service.impl.NewBeeMallShoppingCartServiceImpl`
-- 建议测试类：`NewBeeMallShoppingCartServiceImplTest`
+- 对应测试类：`NewBeeMallShoppingCartServiceImplTest`
 
 a. 正确性测试：
 
@@ -146,7 +146,7 @@ b. 健壮性测试：
 测试包及类：
 
 - `ltd.newbee.mall.service.impl.NewBeeMallOrderServiceImpl`
-- 建议测试类：`NewBeeMallOrderServiceImplTest`
+- 对应测试类：`NewBeeMallOrderServiceImplTest`
 
 a. 正确性测试：
 
@@ -172,7 +172,7 @@ b. 健壮性测试：
 测试包及类：
 
 - `ltd.newbee.mall.service.impl.NewBeeMallOrderServiceImpl`
-- 建议测试类：`NewBeeMallOrderServiceImplTest`
+- 对应测试类：`NewBeeMallOrderServiceImplTest`
 
 a. 正确性测试：
 
@@ -202,7 +202,7 @@ b. 健壮性测试：
 
 - `ltd.newbee.mall.service.impl.NewBeeMallIndexConfigServiceImpl`
 - `ltd.newbee.mall.service.impl.NewBeeMallCarouselServiceImpl`
-- 建议测试类：`NewBeeMallIndexConfigServiceImplTest`、`NewBeeMallCarouselServiceImplTest`
+- 对应测试类：`NewBeeMallIndexConfigServiceImplTest`、`NewBeeMallCarouselServiceImplTest`
 
 a. 正确性测试：
 
