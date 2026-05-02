@@ -77,18 +77,18 @@ public class NewBeeMallOrderServiceImpl implements NewBeeMallOrderService {
     public String checkDone(Long[] ids) {
         //查询所有的订单 判断状态 修改状态和更新时间
         List<NewBeeMallOrder> orders = newBeeMallOrderMapper.selectByPrimaryKeys(Arrays.asList(ids));
-        String errorOrderNos = "";
+        StringBuilder errorOrderNos = new StringBuilder();
         if (!CollectionUtils.isEmpty(orders)) {
             for (NewBeeMallOrder newBeeMallOrder : orders) {
                 if (newBeeMallOrder.getIsDeleted() == 1) {
-                    errorOrderNos += newBeeMallOrder.getOrderNo() + " ";
+                    errorOrderNos.append(newBeeMallOrder.getOrderNo()).append(" ");
                     continue;
                 }
                 if (newBeeMallOrder.getOrderStatus() != 1) {
-                    errorOrderNos += newBeeMallOrder.getOrderNo() + " ";
+                    errorOrderNos.append(newBeeMallOrder.getOrderNo()).append(" ");
                 }
             }
-            if (!StringUtils.hasText(errorOrderNos)) {
+            if (!StringUtils.hasText(errorOrderNos.toString())) {
                 //订单状态正常 可以执行配货完成操作 修改订单状态和更新时间
                 if (newBeeMallOrderMapper.checkDone(Arrays.asList(ids)) > 0) {
                     return ServiceResultEnum.SUCCESS.getResult();
@@ -113,18 +113,18 @@ public class NewBeeMallOrderServiceImpl implements NewBeeMallOrderService {
     public String checkOut(Long[] ids) {
         //查询所有的订单 判断状态 修改状态和更新时间
         List<NewBeeMallOrder> orders = newBeeMallOrderMapper.selectByPrimaryKeys(Arrays.asList(ids));
-        String errorOrderNos = "";
+        StringBuilder errorOrderNos = new StringBuilder();
         if (!CollectionUtils.isEmpty(orders)) {
             for (NewBeeMallOrder newBeeMallOrder : orders) {
                 if (newBeeMallOrder.getIsDeleted() == 1) {
-                    errorOrderNos += newBeeMallOrder.getOrderNo() + " ";
+                    errorOrderNos.append(newBeeMallOrder.getOrderNo()).append(" ");
                     continue;
                 }
                 if (newBeeMallOrder.getOrderStatus() != 1 && newBeeMallOrder.getOrderStatus() != 2) {
-                    errorOrderNos += newBeeMallOrder.getOrderNo() + " ";
+                    errorOrderNos.append(newBeeMallOrder.getOrderNo()).append(" ");
                 }
             }
-            if (!StringUtils.hasText(errorOrderNos)) {
+            if (!StringUtils.hasText(errorOrderNos.toString())) {
                 //订单状态正常 可以执行出库操作 修改订单状态和更新时间
                 if (newBeeMallOrderMapper.checkOut(Arrays.asList(ids)) > 0) {
                     return ServiceResultEnum.SUCCESS.getResult();
@@ -149,20 +149,20 @@ public class NewBeeMallOrderServiceImpl implements NewBeeMallOrderService {
     public String closeOrder(Long[] ids) {
         //查询所有的订单 判断状态 修改状态和更新时间
         List<NewBeeMallOrder> orders = newBeeMallOrderMapper.selectByPrimaryKeys(Arrays.asList(ids));
-        String errorOrderNos = "";
+        StringBuilder errorOrderNos = new StringBuilder();
         if (!CollectionUtils.isEmpty(orders)) {
             for (NewBeeMallOrder newBeeMallOrder : orders) {
                 // isDeleted=1 一定为已关闭订单
                 if (newBeeMallOrder.getIsDeleted() == 1) {
-                    errorOrderNos += newBeeMallOrder.getOrderNo() + " ";
+                    errorOrderNos.append(newBeeMallOrder.getOrderNo()).append(" ");
                     continue;
                 }
                 //已关闭或者已完成无法关闭订单
                 if (newBeeMallOrder.getOrderStatus() == 4 || newBeeMallOrder.getOrderStatus() < 0) {
-                    errorOrderNos += newBeeMallOrder.getOrderNo() + " ";
+                    errorOrderNos.append(newBeeMallOrder.getOrderNo()).append(" ");
                 }
             }
-            if (!StringUtils.hasText(errorOrderNos)) {
+            if (!StringUtils.hasText(errorOrderNos.toString())) {
                 //订单状态正常 可以执行关闭操作 修改订单状态和更新时间&&恢复库存
                 if (newBeeMallOrderMapper.closeOrder(Arrays.asList(ids), NewBeeMallOrderStatusEnum.ORDER_CLOSED_BY_JUDGE.getOrderStatus()) > 0 && recoverStockNum(Arrays.asList(ids))) {
                     return ServiceResultEnum.SUCCESS.getResult();
