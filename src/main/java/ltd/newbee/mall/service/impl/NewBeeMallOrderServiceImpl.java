@@ -252,7 +252,7 @@ public class NewBeeMallOrderServiceImpl implements NewBeeMallOrderService {
                         //所有操作成功后，将订单号返回，以供Controller方法跳转到订单详情
                         return orderNo;
                     }
-                    NewBeeMallException.fail(ServiceResultEnum.ORDER_PRICE_ERROR.getResult());
+                    NewBeeMallException.fail(ServiceResultEnum.ORDER_GENERATE_ERROR.getResult());
                 }
                 NewBeeMallException.fail(ServiceResultEnum.DB_ERROR.getResult());
             }

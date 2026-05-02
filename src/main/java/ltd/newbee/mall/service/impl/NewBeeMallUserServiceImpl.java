@@ -75,7 +75,13 @@ public class NewBeeMallUserServiceImpl implements NewBeeMallUserService {
 
     @Override
     public NewBeeMallUserVO updateUserInfo(MallUser mallUser, HttpSession httpSession) {
+        if (httpSession == null) {
+            return null;
+        }
         NewBeeMallUserVO userTemp = (NewBeeMallUserVO) httpSession.getAttribute(Constants.MALL_USER_SESSION_KEY);
+        if (userTemp == null) {
+            return null;
+        }
         MallUser userFromDB = mallUserMapper.selectByPrimaryKey(userTemp.getUserId());
         if (userFromDB != null) {
             if (StringUtils.hasText(mallUser.getNickName())) {
