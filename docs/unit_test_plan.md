@@ -227,30 +227,125 @@ b. 健壮性测试：
 
 ## 三、边界测试设计
 
-1. 字符串边界：
-   - 用户昵称长度为 `7` 时不截断，长度为 `8` 时截断。
-   - 购物车商品名长度为 `28` 时不截断，长度为 `29` 时截断。
-   - 首页商品名长度为 `30` 时不截断，长度为 `31` 时截断。
-   - 首页商品简介长度为 `22` 时不截断，长度为 `23` 时截断。
+边界测试包：
 
-2. 数量边界：
-   - 购物车单个商品购买数量为 `5` 时允许，数量为 `6` 时拒绝。
-   - 购物车已有 `12` 个商品时允许新增，已有 `13` 个商品时拒绝新增。
-   - 商品库存等于购买数量时允许下单，库存小于购买数量时拒绝下单。
+- `ltd.newbee.mall.service.boundary`
+- 公共测试数据构造类：`BoundaryTestFixtures`
 
-3. 金额边界：
-   - 订单总价为 `1` 时允许创建订单。
-   - 订单总价为 `0` 时拒绝创建订单。
+边界测试同样使用 JUnit5 与 Mockito，不连接真实数据库，不启动完整 Spring Boot 上下文。测试类按业务服务拆分，重点验证临界值两侧的返回值、异常信息、状态变化和关键对象字段。
 
-4. 状态边界：
-   - 商品状态为上架时允许展示和下单。
-   - 商品状态为下架时拒绝下单。
-   - 订单状态分别覆盖待支付、已支付、配货完成、出库成功、交易成功、手动关闭、超时关闭、商家关闭。
+### 1. 用户登录展示边界
 
-5. 集合边界：
-   - 批量删除、批量锁定、批量上下架时 ID 数组为空，应返回失败。
-   - 购物车列表为空时不允许创建订单。
-   - 订单项为空时不允许返回正常订单详情。
+测试生产类：
+
+- `ltd.newbee.mall.service.impl.NewBeeMallUserServiceImpl`
+
+对应测试类：
+
+- `BoundaryNewBeeMallUserTest`
+
+测试用例：
+
+1. `login_withNicknameLengthSeven_doesNotTruncateNickname`：用户昵称长度为 `7` 时，登录成功后 session 中昵称不截断。
+2. `login_withNicknameLengthEight_truncatesNickname`：用户昵称长度为 `8` 时，登录成功后 session 中昵称截断为前 `7` 位加 `..`。
+
+### 2. 购物车数量与展示边界
+
+测试生产类：
+
+- `ltd.newbee.mall.service.impl.NewBeeMallShoppingCartServiceImpl`
+
+对应测试类：
+
+- `BoundaryNewBeeMallShoppingCartTest`
+
+测试用例：
+
+1. `saveNewBeeMallCartItem_withGoodsCountEqualLimit_returnsSuccess`：单个商品购买数量等于 `Constants.SHOPPING_CART_ITEM_LIMIT_NUMBER` 时，添加购物车成功。
+2. `saveNewBeeMallCartItem_withGoodsCountOneAboveLimit_returnsLimitMessage`：单个商品购买数量超过上限 `1` 个时，返回单商品购买数量超限提示。
+3. `saveNewBeeMallCartItem_whenUserHasTwelveItems_allowsOneMoreItem`：用户购物车已有 `Constants.SHOPPING_CART_ITEM_TOTAL_NUMBER - 1` 个商品时，允许再新增一个商品。
+4. `saveNewBeeMallCartItem_whenUserHasThirteenItems_rejectsOneMoreItem`：用户购物车已有 `Constants.SHOPPING_CART_ITEM_TOTAL_NUMBER` 个商品时，拒绝继续新增。
+5. `getMyShoppingCartItems_withGoodsNameLengthTwentyEight_doesNotTruncateName`：购物车商品名长度为 `28` 时不截断。
+6. `getMyShoppingCartItems_withGoodsNameLengthTwentyNine_truncatesName`：购物车商品名长度为 `29` 时截断为前 `28` 位加 `...`。
+
+### 3. 订单创建、状态与金额边界
+
+测试生产类：
+
+- `ltd.newbee.mall.service.impl.NewBeeMallOrderServiceImpl`
+- `ltd.newbee.mall.common.NewBeeMallOrderStatusEnum`
+
+对应测试类：
+
+- `BoundaryNewBeeMallOrderTest`
+
+测试用例：
+
+1. `saveOrder_whenGoodsIsUp_allowsOrder`：商品状态为上架时允许创建订单。
+2. `saveOrder_whenGoodsIsDown_rejectsOrder`：商品状态为下架时拒绝创建订单，并抛出商品已下架相关异常。
+3. `saveOrder_whenStockEqualsPurchaseCount_allowsOrder`：商品库存等于购买数量时允许创建订单。
+4. `saveOrder_whenStockIsLessThanPurchaseCount_throwsStockError`：商品库存小于购买数量时抛出库存不足异常。
+5. `saveOrder_whenTotalPriceIsOne_allowsOrder`：订单总价为 `1` 时允许创建订单，并写入订单总价。
+6. `saveOrder_whenTotalPriceIsZero_throwsOrderPriceError`：订单总价为 `0` 时抛出订单价格异常。
+7. `saveOrder_whenCartItemsEmpty_throwsShoppingCartDataError`：购物车列表为空时抛出购物车数据异常。
+8. `getOrderDetailByOrderNo_mapsEveryOrderStatusToDisplayName`：除 `DEFAULT` 外的所有订单状态枚举均可映射为对应展示名称。
+9. `getOrderDetailByOrderNo_whenOrderItemsEmpty_throwsOrderItemNotExist`：订单项为空时不返回正常订单详情，抛出订单项不存在异常。
+10. `paySuccess_whenOrderIsPrePay_updatesStatusToPaid`：订单处于待支付状态时，支付成功后状态更新为已支付。
+11. `finishOrder_whenOrderIsExpress_updatesStatusToSuccess`：订单处于出库成功状态时，确认收货后状态更新为交易成功。
+12. `getNewBeeMallOrderStatusEnumByStatus_returnsDefinedClosedStatuses`：手动关闭、超时关闭、商家关闭状态码均能映射为对应订单状态枚举。
+
+### 4. 首页配置商品展示边界
+
+测试生产类：
+
+- `ltd.newbee.mall.service.impl.NewBeeMallIndexConfigServiceImpl`
+
+对应测试类：
+
+- `BoundaryNewBeeMallIndexConfigTest`
+
+测试用例：
+
+1. `getConfigGoodsesForIndex_withNameLengthThirty_doesNotTruncateName`：首页商品名长度为 `30` 时不截断。
+2. `getConfigGoodsesForIndex_withNameLengthThirtyOne_truncatesName`：首页商品名长度为 `31` 时截断为前 `30` 位加 `...`。
+3. `getConfigGoodsesForIndex_withIntroLengthTwentyTwo_doesNotTruncateIntro`：首页商品简介长度为 `22` 时不截断。
+4. `getConfigGoodsesForIndex_withIntroLengthTwentyThree_truncatesIntro`：首页商品简介长度为 `23` 时截断为前 `22` 位加 `...`。
+
+### 5. 商品展示状态边界
+
+测试生产类：
+
+- `ltd.newbee.mall.service.impl.NewBeeMallGoodsServiceImpl`
+
+对应测试类：
+
+- `BoundaryNewBeeMallGoodsTest`
+
+测试用例：
+
+1. `getNewBeeMallGoodsById_whenGoodsIsUp_returnsGoodsForDisplay`：商品状态为上架时，查询商品详情返回原商品对象，并保留上架状态。
+
+### 6. 批量操作空集合边界
+
+测试生产类：
+
+- `ltd.newbee.mall.service.impl.NewBeeMallUserServiceImpl`
+- `ltd.newbee.mall.service.impl.NewBeeMallCategoryServiceImpl`
+- `ltd.newbee.mall.service.impl.NewBeeMallGoodsServiceImpl`
+- `ltd.newbee.mall.service.impl.NewBeeMallIndexConfigServiceImpl`
+- `ltd.newbee.mall.service.impl.NewBeeMallCarouselServiceImpl`
+
+对应测试类：
+
+- `BatchOperationBoundaryTest`
+
+测试用例：
+
+1. `lockUsers_withEmptyIds_returnsFalse`：批量锁定用户时，ID 数组为空返回 `false`。
+2. `deleteCategories_withEmptyIds_returnsFalse`：批量删除分类时，ID 数组为空返回 `false`。
+3. `batchUpdateSellStatus_withEmptyIds_returnsFalse`：批量更新商品上下架状态时，ID 数组为空返回 `false`。
+4. `deleteIndexConfigs_withEmptyIds_returnsFalse`：批量删除首页配置时，ID 数组为空返回 `false`。
+5. `deleteCarousels_withEmptyIds_returnsFalse`：批量删除轮播图时，ID 数组为空返回 `false`。
 
 ## 四、执行建议
 
