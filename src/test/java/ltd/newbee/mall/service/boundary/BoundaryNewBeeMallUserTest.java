@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class NewBeeMallUserBoundaryTest {
+class BoundaryNewBeeMallUserTest {
 
     @Mock
     private MallUserMapper mallUserMapper;

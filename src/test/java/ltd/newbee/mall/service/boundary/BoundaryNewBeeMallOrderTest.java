@@ -37,7 +37,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class NewBeeMallOrderBoundaryTest {
+class BoundaryNewBeeMallOrderTest {
 
     @Mock
     private NewBeeMallOrderMapper orderMapper;

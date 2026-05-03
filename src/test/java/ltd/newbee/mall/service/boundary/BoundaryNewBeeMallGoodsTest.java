@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class NewBeeMallGoodsBoundaryTest {
+class BoundaryNewBeeMallGoodsTest {
 
     @Mock
     private NewBeeMallGoodsMapper goodsMapper;
