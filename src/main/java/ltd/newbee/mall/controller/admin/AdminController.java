@@ -13,7 +13,9 @@ import ltd.newbee.mall.common.ServiceResultEnum;
 import ltd.newbee.mall.entity.AdminUser;
 import ltd.newbee.mall.service.AdminUserService;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,8 +36,12 @@ public class AdminController {
     @Resource
     private AdminUserService adminUserService;
 
+    @Value("${newbee.mall.captcha-enabled:true}")
+    private boolean captchaEnabled;
+
     @GetMapping({"/login"})
-    public String login() {
+    public String login(Model model) {
+        model.addAttribute("captchaEnabled", captchaEnabled);
         return "admin/login";
     }
 
@@ -54,9 +60,11 @@ public class AdminController {
     @PostMapping(value = "/login")
     public String login(@RequestParam("userName") String userName,
                         @RequestParam("password") String password,
-                        @RequestParam("verifyCode") String verifyCode,
-                        HttpSession session) {
-        if (!StringUtils.hasText(verifyCode)) {
+                        @RequestParam(value = "verifyCode", required = false) String verifyCode,
+                        HttpSession session,
+                        Model model) {
+        model.addAttribute("captchaEnabled", captchaEnabled);
+        if (captchaEnabled && !StringUtils.hasText(verifyCode)) {
             session.setAttribute("errorMsg", "验证码不能为空");
             return "admin/login";
         }
@@ -65,7 +73,7 @@ public class AdminController {
             return "admin/login";
         }
         ShearCaptcha shearCaptcha = (ShearCaptcha) session.getAttribute("verifyCode");
-        if (shearCaptcha == null || !shearCaptcha.verify(verifyCode)) {
+        if (captchaEnabled && (shearCaptcha == null || !shearCaptcha.verify(verifyCode))) {
             session.setAttribute("errorMsg", "验证码错误");
             return "admin/login";
         }
@@ -130,10 +138,11 @@ public class AdminController {
     }
 
     @GetMapping("/logout")
-    public String logout(HttpServletRequest request) {
+    public String logout(HttpServletRequest request, Model model) {
         request.getSession().removeAttribute("loginUserId");
         request.getSession().removeAttribute("loginUser");
         request.getSession().removeAttribute("errorMsg");
+        model.addAttribute("captchaEnabled", captchaEnabled);
         return "admin/login";
     }
 }

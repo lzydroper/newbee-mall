@@ -36,7 +36,7 @@
                                                                                     id="password"
                                                                                     placeholder="请输入你的密码"/>
                     </div>
-                    <div class="login-info">
+                    <div class="login-info" th:if="${captchaEnabled}">
                         验证码:&nbsp;
                         <input class="login-info-input verify-code" type="text" name="verifyCode" id="verifyCode"
                                placeholder="请输入验证码"/>
@@ -56,7 +56,8 @@
 <script th:src="@{/admin/plugins/jquery/jquery.min.js}"></script>
 <script th:src="@{/admin/dist/js/public.js}"></script>
 <script th:src="@{/admin/plugins/sweetalert2/sweetalert2.all.min.js}"></script>
-<script type="text/javascript">
+<script type="text/javascript" th:inline="javascript">
+    var captchaEnabled = [[${captchaEnabled}]];
 
     //注册按钮onclick事件改为register()即可
     function register() {
@@ -77,7 +78,7 @@
             return false;
         }
         var verifyCode = $("#verifyCode").val();
-        if (!validLength(verifyCode, 5)) {
+        if (captchaEnabled && !validLength(verifyCode, 5)) {
             Swal.fire({
                 text: "请输入正确的验证码",
                 icon: "error",iconColor:"#f05b72",

@@ -17,7 +17,9 @@ import ltd.newbee.mall.service.NewBeeMallUserService;
 import ltd.newbee.mall.util.MD5Util;
 import ltd.newbee.mall.util.Result;
 import ltd.newbee.mall.util.ResultGenerator;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,6 +33,9 @@ public class PersonalController {
     @Resource
     private NewBeeMallUserService newBeeMallUserService;
 
+    @Value("${newbee.mall.captcha-enabled:true}")
+    private boolean captchaEnabled;
+
     @GetMapping("/personal")
     public String personalPage(HttpServletRequest request,
                                HttpSession httpSession) {
@@ -39,18 +44,21 @@ public class PersonalController {
     }
 
     @GetMapping("/logout")
-    public String logout(HttpSession httpSession) {
+    public String logout(HttpSession httpSession, Model model) {
         httpSession.removeAttribute(Constants.MALL_USER_SESSION_KEY);
+        model.addAttribute("captchaEnabled", captchaEnabled);
         return "mall/login";
     }
 
     @GetMapping({"/login", "login.html"})
-    public String loginPage() {
+    public String loginPage(Model model) {
+        model.addAttribute("captchaEnabled", captchaEnabled);
         return "mall/login";
     }
 
     @GetMapping({"/register", "register.html"})
-    public String registerPage() {
+    public String registerPage(Model model) {
+        model.addAttribute("captchaEnabled", captchaEnabled);
         return "mall/register";
     }
 
@@ -62,7 +70,7 @@ public class PersonalController {
     @PostMapping("/login")
     @ResponseBody
     public Result login(@RequestParam("loginName") String loginName,
-                        @RequestParam("verifyCode") String verifyCode,
+                        @RequestParam(value = "verifyCode", required = false) String verifyCode,
                         @RequestParam("password") String password,
                         HttpSession httpSession) {
         if (!StringUtils.hasText(loginName)) {
@@ -71,12 +79,12 @@ public class PersonalController {
         if (!StringUtils.hasText(password)) {
             return ResultGenerator.genFailResult(ServiceResultEnum.LOGIN_PASSWORD_NULL.getResult());
         }
-        if (!StringUtils.hasText(verifyCode)) {
+        if (captchaEnabled && !StringUtils.hasText(verifyCode)) {
             return ResultGenerator.genFailResult(ServiceResultEnum.LOGIN_VERIFY_CODE_NULL.getResult());
         }
         ShearCaptcha shearCaptcha = (ShearCaptcha) httpSession.getAttribute(Constants.MALL_VERIFY_CODE_KEY);
 
-        if (shearCaptcha == null || !shearCaptcha.verify(verifyCode)) {
+        if (captchaEnabled && (shearCaptcha == null || !shearCaptcha.verify(verifyCode))) {
             return ResultGenerator.genFailResult(ServiceResultEnum.LOGIN_VERIFY_CODE_ERROR.getResult());
         }
         String loginResult = newBeeMallUserService.login(loginName, MD5Util.MD5Encode(password, "UTF-8"), httpSession);
@@ -93,7 +101,7 @@ public class PersonalController {
     @PostMapping("/register")
     @ResponseBody
     public Result register(@RequestParam("loginName") String loginName,
-                           @RequestParam("verifyCode") String verifyCode,
+                           @RequestParam(value = "verifyCode", required = false) String verifyCode,
                            @RequestParam("password") String password,
                            HttpSession httpSession) {
         if (!StringUtils.hasText(loginName)) {
@@ -102,11 +110,11 @@ public class PersonalController {
         if (!StringUtils.hasText(password)) {
             return ResultGenerator.genFailResult(ServiceResultEnum.LOGIN_PASSWORD_NULL.getResult());
         }
-        if (!StringUtils.hasText(verifyCode)) {
+        if (captchaEnabled && !StringUtils.hasText(verifyCode)) {
             return ResultGenerator.genFailResult(ServiceResultEnum.LOGIN_VERIFY_CODE_NULL.getResult());
         }
         ShearCaptcha shearCaptcha = (ShearCaptcha) httpSession.getAttribute(Constants.MALL_VERIFY_CODE_KEY);
-        if (shearCaptcha == null || !shearCaptcha.verify(verifyCode)) {
+        if (captchaEnabled && (shearCaptcha == null || !shearCaptcha.verify(verifyCode))) {
             return ResultGenerator.genFailResult(ServiceResultEnum.LOGIN_VERIFY_CODE_ERROR.getResult());
         }
         String registerResult = newBeeMallUserService.register(loginName, password);
